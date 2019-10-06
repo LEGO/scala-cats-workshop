@@ -6,3 +6,4 @@ exercises/.metals/
 target/
 
 .bloop/
+exercises/.idea/
