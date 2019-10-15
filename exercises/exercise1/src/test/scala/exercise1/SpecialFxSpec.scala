@@ -4,7 +4,7 @@ import org.specs2._
 
 import SpecialFx._
 
-class QuickStartSpec extends mutable.Specification {
+class SpecialFxSpec extends mutable.Specification {
 
   "SpecialFx" should {
 
@@ -35,7 +35,6 @@ class QuickStartSpec extends mutable.Specification {
 
       counter mustEqual 3
     }
-
 
   }
 
