@@ -29,7 +29,7 @@ object Exercise2Main extends App {
     }
 
   private def combineIntersperse[T: CombineId](ts: List[T])(inject: T): T =
-    intersperse(ts)(inject).foldLeft(CombineId[T].id)(_ <+> _)
+    intersperse(ts)(inject).foldLeft(CombineId[T].id)(_ |+| _)
 
   val combineProgram: SpecialFx[BusinessInteger] = for {
     _                <- delay { print(s"How many numbers do you want to combine?: ") }

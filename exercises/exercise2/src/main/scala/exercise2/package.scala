@@ -30,7 +30,7 @@ package object exercise2 {
     */
   def add[T: Combine](x: T, y: T): T = {
     import typeclasses.syntax._
-    x <+> y
+    x |+| y
   }
 
   /**

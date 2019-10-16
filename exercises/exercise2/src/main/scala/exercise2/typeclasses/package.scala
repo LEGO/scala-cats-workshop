@@ -56,7 +56,7 @@ package object typeclasses {
 
   object syntax {
     implicit class CombineSyntax[T: Combine](t: T) {
-      def <+>(that: T): T = Combine[T].combine(t, that)
+      def |+|(that: T): T = Combine[T].combine(t, that)
     }
   }
 }
