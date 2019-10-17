@@ -1,0 +1,13 @@
+ivy/
+exercises/.bloop/
+
+exercises/.metals/
+
+target/
+
+.bloop/
+.metals/
+
+exercises/.idea/
+
+slides-out/
