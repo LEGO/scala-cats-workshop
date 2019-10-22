@@ -23,11 +23,14 @@ Mostly *backend, functional programming*
 * Slides are *type-checked* by the Scala compiler [via MDOC](https://github.com/scalameta/mdoc)
 * Exercises in a multi-SBT project
 
+---
+
+FILE: part1-effects.md
+
+---
+
+
+FILE: part2-typeclasses.md
+
+
 ----
-
-
-```scala mdoc
-val xs = List(1,2) ++ List(39)
-
-val y = xs.sum
-```
