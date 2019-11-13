@@ -20,9 +20,9 @@ object IncomingWebsocketMessage {
 sealed trait OutgoingWebsocketMessage
 object OutgoingWebsocketMessage {
   implicit val messageCodec: Codec.AsObject[Message]       = deriveCodec
+  implicit val connectedCodec: Codec.AsObject[Connected]   = deriveCodec
   implicit val userJoinedCodec: Codec.AsObject[UserJoined] = deriveCodec
   implicit val userLeftCodec: Codec.AsObject[UserLeft]     = deriveCodec
-  implicit val userListCodec: Codec.AsObject[UserList]     = deriveCodec
   implicit val codec: Codec[OutgoingWebsocketMessage]      = deriveCodec
 
   def fromPubSubMessage(psm: PubSubMessage, timestamp: Long): OutgoingWebsocketMessage =
@@ -33,6 +33,8 @@ object OutgoingWebsocketMessage {
         Message(timestamp, username, text, isEmote, imageUrl)
     }
 
+  // "Callback" with the unique username after connection
+  case class Connected(username: String, userList: List[String]) extends OutgoingWebsocketMessage
   case class Message(
       timestamp: Long,
       username: String,
@@ -42,7 +44,6 @@ object OutgoingWebsocketMessage {
   ) extends OutgoingWebsocketMessage
   case class UserJoined(timestamp: Long, username: String, userList: List[String]) extends OutgoingWebsocketMessage
   case class UserLeft(timestamp: Long, username: String, userList: List[String])   extends OutgoingWebsocketMessage
-  case class UserList(userList: List[String])                                      extends OutgoingWebsocketMessage
 }
 
 sealed trait PubSubMessage

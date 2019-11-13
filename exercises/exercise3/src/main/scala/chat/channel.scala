@@ -80,10 +80,11 @@ class ChatChannel[F[_]: Sync: Timer](
     Monad[F].tailRecM((username, 0)) {
       case (username, count) =>
         val uniquerUsername = makeUniquerUsername(username, count)
-        isUsernameAvailable(uniquerUsername).map {
-          case true  => Right(username)
-          case false => Left((username, count + 1))
-        }
+        isUsernameAvailable(uniquerUsername)
+          .map {
+            case true  => Right(uniquerUsername)
+            case false => Left((username, count + 1))
+          }
     }
 
   def makeUniquerUsername(username: String, count: Int): String =

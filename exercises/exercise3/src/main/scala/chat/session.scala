@@ -24,7 +24,7 @@ class ChatSession[F[_]: Sync](
   val timestamp: F[Long] = timer.clock.realTime(TimeUnit.SECONDS)
 
   val toClient: Stream[F, OutgoingWebsocketMessage] =
-    Stream(OutgoingWebsocketMessage.UserList(initialUserList)) ++
+    Stream(OutgoingWebsocketMessage.Connected(username, initialUserList)) ++
       subscribe
         .evalMap(msg => timestamp.map(ts => OutgoingWebsocketMessage.fromPubSubMessage(msg, ts)))
         .through(outgoingPipe)
