@@ -1,13 +1,14 @@
 val V = new {
   val cats            = "2.0.0"
-  val circe           = "0.12.2"
+  val circe           = "0.12.3"
   val circeDerivation = "0.12.0-M7"
+  val fs2             = "2.1.0"
   val http4s          = "0.21.0-M5"
   val kindProjector   = "0.11.0"
   val logback         = "1.2.3"
   val log4cats        = "1.0.1"
   val redis4cats      = "0.9.1"
-  val specs2          = "4.6.0"
+  val specs2          = "4.8.0"
 }
 
 val commonSettings = Seq(
@@ -43,6 +44,7 @@ lazy val exercise3 = (project in file("exercise3"))
   .settings(commonSettings, name += ": Putting it all together (Chat Server)")
   .settings(
     libraryDependencies ++= Seq(
+      "co.fs2"            %% "fs2-io"              % V.fs2,
       "dev.profunktor"    %% "redis4cats-effects"  % V.redis4cats,
       "dev.profunktor"    %% "redis4cats-streams"  % V.redis4cats,
       "dev.profunktor"    %% "redis4cats-log4cats" % V.redis4cats,

@@ -14,6 +14,7 @@ trait Channel[F[_]] {
 
 class ChatChannel[F[_]: Sync: Timer](
     channel: RedisChannel[String],
+    plugins: Plugins[F],
     redis: SetCommands[F, String, String],
     pubsub: PubSubCommands[Stream[F, *], String, PubSubMessage]
 ) extends Channel[F] {
@@ -21,7 +22,7 @@ class ChatChannel[F[_]: Sync: Timer](
 
   val usersSetName = "users"
 
-  val publish = pubsub.publish(channel)
+  val publish: Stream[F, PubSubMessage] => Stream[F, Unit] = pubsub.publish(channel)
 
   def connect(username: String): F[Session[F]] =
     for {
@@ -29,9 +30,11 @@ class ChatChannel[F[_]: Sync: Timer](
       _                 <- addUsername(availableUsername)
       _                 <- publishJoinMessage(availableUsername)
       initialUserList   <- userList
-      publish   = pubsub.publish(channel)
-      subscribe = pubsub.subscribe(channel)
-    } yield new ChatSession[F](availableUsername, initialUserList, publish, subscribe)
+      incomingPipe = plugins.incomingPipe(availableUsername)
+      outgoingPipe = plugins.outgoingPipe(availableUsername)
+      publish      = pubsub.publish(channel)
+      subscribe    = pubsub.subscribe(channel)
+    } yield new ChatSession[F](availableUsername, initialUserList, incomingPipe, outgoingPipe, publish, subscribe)
 
   def disconnect(session: Session[F]): F[Unit] =
     for {
@@ -55,7 +58,7 @@ class ChatChannel[F[_]: Sync: Timer](
     Stream
       .eval(userList)
       .map(users => Join(username, users))
-      .to(publish)
+      .through(publish)
       .compile
       .drain
 
@@ -63,7 +66,7 @@ class ChatChannel[F[_]: Sync: Timer](
     Stream
       .eval(userList)
       .map(users => Leave(username, users))
-      .to(publish)
+      .through(publish)
       .compile
       .drain
 

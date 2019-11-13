@@ -1,11 +1,11 @@
 package chat
 
-import dev.profunktor.redis4cats.domain.RedisCodec
+import dev.profunktor.redis4cats.domain.{JCodec, RedisCodec}
 import io.circe.Codec
 import io.circe.derivation.deriveCodec
 import io.circe.parser._
 import io.circe.syntax._
-import io.lettuce.core.codec.{RedisCodec => JRedisCodec, StringCodec, ToByteBufEncoder}
+import io.lettuce.core.codec.{StringCodec, ToByteBufEncoder, RedisCodec => JRedisCodec}
 import io.netty.buffer.ByteBuf
 import java.nio.ByteBuffer
 
@@ -58,21 +58,22 @@ object PubSubMessage {
 }
 
 object PubSubCodec extends RedisCodec[String, PubSubMessage] {
-  val codec = StringCodec.UTF8
-  val underlying = new JRedisCodec[String, PubSubMessage] with ToByteBufEncoder[String, PubSubMessage] {
-    override def decodeKey(bytes: ByteBuffer): String = codec.decodeKey(bytes)
-    override def encodeKey(key: String): ByteBuffer   = codec.encodeKey(key)
+  val codec: StringCodec = StringCodec.UTF8
+  val underlying: JCodec[String, PubSubMessage] =
+    new JRedisCodec[String, PubSubMessage] with ToByteBufEncoder[String, PubSubMessage] {
+      override def decodeKey(bytes: ByteBuffer): String = codec.decodeKey(bytes)
+      override def encodeKey(key: String): ByteBuffer   = codec.encodeKey(key)
 
-    override def encodeValue(value: PubSubMessage): ByteBuffer =
-      codec.encodeValue(value.asJson.noSpaces)
-    override def decodeValue(bytes: ByteBuffer): PubSubMessage =
-      decode[PubSubMessage](codec.decodeValue(bytes)).getOrElse(throw new NoSuchElementException)
+      override def encodeValue(value: PubSubMessage): ByteBuffer =
+        codec.encodeValue(value.asJson.noSpaces)
+      override def decodeValue(bytes: ByteBuffer): PubSubMessage =
+        decode[PubSubMessage](codec.decodeValue(bytes)).getOrElse(throw new NoSuchElementException)
 
-    override def encodeKey(key: String, target: ByteBuf): Unit =
-      codec.encodeKey(key, target)
-    override def encodeValue(value: PubSubMessage, target: ByteBuf): Unit =
-      codec.encodeValue(value.asJson.noSpaces, target)
+      override def encodeKey(key: String, target: ByteBuf): Unit =
+        codec.encodeKey(key, target)
+      override def encodeValue(value: PubSubMessage, target: ByteBuf): Unit =
+        codec.encodeValue(value.asJson.noSpaces, target)
 
-    override def estimateSize(keyOrValue: scala.Any): Int = codec.estimateSize(keyOrValue)
-  }
+      override def estimateSize(keyOrValue: scala.Any): Int = codec.estimateSize(keyOrValue)
+    }
 }

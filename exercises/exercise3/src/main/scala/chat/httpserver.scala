@@ -16,23 +16,24 @@ import org.http4s.websocket.WebSocketFrame.Text
 class HttpServer[F[_]: ConcurrentEffect: Timer](channel: Channel[F]) extends Http4sDsl[F] {
   object UsernameParam extends QueryParamDecoderMatcher[String]("username")
 
-  val routes = HttpRoutes.of[F] {
+  val routes: HttpRoutes[F] = HttpRoutes.of[F] {
     case GET -> Root / "chat" :? UsernameParam(username) =>
       channel
         .connect(username)
         .flatMap(buildWebSocket)
   }
 
-  val server = BlazeServerBuilder[F]
-    .bindLocal(4000)
-    .withHttpApp(routes.orNotFound)
+  val server: BlazeServerBuilder[F] =
+    BlazeServerBuilder[F]
+      .bindLocal(4000)
+      .withHttpApp(routes.orNotFound)
 
   def buildWebSocket(session: Session[F]): F[Response[F]] =
     WebSocketBuilder[F].build(
       // Encode pubsub messages to websocket frames and make sure we disconnect the client when the websocket connection ends
       session.toClient.through(encodeWebsocketFrame).onFinalize(channel.disconnect(session)),
       // Attempt decoding to pubsubmessage, and drop frames that fail to decode
-      _.through(decodeWebsocketFrame).to(session.fromClient)
+      _.through(decodeWebsocketFrame).through(session.fromClient)
     )
 
   def encodeWebsocketFrame: Pipe[F, OutgoingWebsocketMessage, WebSocketFrame] =
