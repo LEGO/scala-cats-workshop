@@ -1,0 +1,19 @@
+.message {
+  font-size: 14px;
+
+  &-handler {
+    &-user {
+      font-weight: bold;
+    }
+
+    &-date {
+      font-size: 13px;
+      padding-left: 10px;
+    }
+  }
+
+  &-text {
+    margin-bottom: 15px;
+    margin-top: 5px;
+  }
+}
