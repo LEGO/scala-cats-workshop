@@ -1,0 +1,9 @@
+@import "../../style/__constants";
+
+.users {
+  padding: 10px;
+
+  > h3 {
+    color: $color4;
+  }
+}
