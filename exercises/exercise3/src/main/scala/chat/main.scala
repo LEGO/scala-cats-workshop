@@ -24,7 +24,7 @@ object Main extends IOApp {
   def run(args: List[String]): IO[ExitCode] =
     stream.compile.drain.as(ExitCode.Success)
 
-  val incomingPlugins: List[IncomingChatPlugin[IO]] = List.empty
+  val incomingPlugins: List[IncomingChatPlugin[IO]] = List(Plugins.emote)
   val outgoingPlugins: List[OutgoingChatPlugin[IO]] = List(Plugins.highlightUser)
 
   val plugins = Plugins(incomingPlugins, outgoingPlugins)
@@ -35,8 +35,9 @@ object Main extends IOApp {
       client      <- Stream.resource(connection.RedisClient[IO](redisUri))
       setCommands <- makeSetCommands(client, redisUri)
       pubsub      <- PubSub.mkPubSubConnection[IO, String, PubSubMessage](client, PubSubCodec, redisUri)
+      blocker     <- Stream.resource(Blocker[IO])
       channel    = new ChatChannel[IO](chatChannel, plugins, setCommands, pubsub)
-      httpServer = new HttpServer[IO](channel)
+      httpServer = new HttpServer[IO](blocker, channel)
       _ <- httpServer.server.serve
     } yield ()
 
