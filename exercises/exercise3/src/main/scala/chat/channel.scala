@@ -2,6 +2,7 @@ package chat
 
 import cats._
 import cats.effect._
+import cats.effect.concurrent.Ref
 import cats.implicits._
 import dev.profunktor.redis4cats.algebra.{PubSubCommands, SetCommands}
 import dev.profunktor.redis4cats.domain.RedisChannel
@@ -14,6 +15,7 @@ trait Channel[F[_]] {
 
 class ChatChannel[F[_]: Sync: Timer](
     channel: RedisChannel[String],
+    localUsers: Ref[F, Set[String]],
     plugins: Plugins[F],
     redis: SetCommands[F, String, String],
     pubsub: PubSubCommands[Stream[F, *], String, PubSubMessage]
@@ -30,11 +32,13 @@ class ChatChannel[F[_]: Sync: Timer](
       _                 <- addUsername(availableUsername)
       _                 <- publishJoinMessage(availableUsername)
       initialUserList   <- userList
-      incomingPipe = plugins.incomingPipe(availableUsername)
-      outgoingPipe = plugins.outgoingPipe(availableUsername)
-      publish      = pubsub.publish(channel)
-      subscribe    = pubsub.subscribe(channel)
-    } yield new ChatSession[F](availableUsername, initialUserList, incomingPipe, outgoingPipe, publish, subscribe)
+    } yield {
+      val incomingPipe = plugins.incomingPipe(availableUsername)
+      val outgoingPipe = plugins.outgoingPipe(availableUsername)
+      val publish      = pubsub.publish(channel)
+      val subscribe    = pubsub.subscribe(channel)
+      new ChatSession[F](availableUsername, initialUserList, incomingPipe, outgoingPipe, publish, subscribe)
+    }
 
   def disconnect(session: Session[F]): F[Unit] =
     for {
@@ -43,10 +47,12 @@ class ChatChannel[F[_]: Sync: Timer](
     } yield ()
 
   def addUsername(username: String): F[Unit] =
-    redis.sAdd(usersSetName, username)
+    localUsers.update(_ + username) >>
+      redis.sAdd(usersSetName, username)
 
   def removeUsername(username: String): F[Unit] =
-    redis.sRem(usersSetName, username)
+    localUsers.update(_ - username) >>
+      redis.sRem(usersSetName, username)
 
   def isUsernameAvailable(username: String): F[Boolean] =
     redis.sIsMember(usersSetName, username).map(!_)
@@ -84,4 +90,19 @@ class ChatChannel[F[_]: Sync: Timer](
     if (count == 0) username
     else s"$username ($count)"
 
+  // Remove any local users from redis when we are shutting down
+  def shutdown: F[Unit] =
+    localUsers.get.flatMap(_.toList.traverse(removeUsername)).void
+
+}
+
+object ChatChannel {
+  def makeResource[F[_]: Sync: Timer](
+      channel: RedisChannel[String],
+      localUsers: Ref[F, Set[String]],
+      plugins: Plugins[F],
+      redis: SetCommands[F, String, String],
+      pubsub: PubSubCommands[Stream[F, *], String, PubSubMessage]
+  ): Resource[F, ChatChannel[F]] =
+    Resource.make(Sync[F].delay(new ChatChannel(channel, localUsers, plugins, redis, pubsub)))(_.shutdown)
 }

@@ -1,6 +1,7 @@
 package chat
 
 import cats.effect._
+import cats.effect.concurrent.Ref
 import cats.implicits._
 import chat.ChatPlugin.{IncomingChatPlugin, OutgoingChatPlugin}
 import chat.OutgoingWebsocketMessage.Message
@@ -36,7 +37,8 @@ object Main extends IOApp {
       setCommands <- makeSetCommands(client, redisUri)
       pubsub      <- PubSub.mkPubSubConnection[IO, String, PubSubMessage](client, PubSubCodec, redisUri)
       blocker     <- Stream.resource(Blocker[IO])
-      channel    = new ChatChannel[IO](chatChannel, plugins, setCommands, pubsub)
+      localUsers  <- Stream.eval(Ref.of[IO, Set[String]](Set.empty))
+      channel     <- Stream.resource(ChatChannel.makeResource[IO](chatChannel, localUsers, plugins, setCommands, pubsub))
       httpServer = new HttpServer[IO](blocker, channel)
       _ <- httpServer.server.serve
     } yield ()
