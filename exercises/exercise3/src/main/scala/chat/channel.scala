@@ -33,8 +33,8 @@ class ChatChannel[F[_]: Sync: Timer](
       _                 <- publishJoinMessage(availableUsername)
       initialUserList   <- userList
     } yield {
-      val incomingPipe = plugins.incomingPipe(availableUsername)
-      val outgoingPipe = plugins.outgoingPipe(availableUsername)
+      val incomingPipe = plugins.publicPipe(availableUsername)
+      val outgoingPipe = plugins.personalPipe(availableUsername)
       val publish      = pubsub.publish(channel)
       val subscribe    = pubsub.subscribe(channel)
       new ChatSession[F](availableUsername, initialUserList, incomingPipe, outgoingPipe, publish, subscribe)

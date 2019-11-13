@@ -3,29 +3,33 @@ package chat
 import fs2.Pipe
 
 object ChatPlugin {
-  type UserName                 = String
-  type ChatPlugin[F[_], Msg]    = UserName => Pipe[F, Msg, Msg]
-  type IncomingChatPlugin[F[_]] = UserName => Pipe[F, IncomingWebsocketMessage, IncomingWebsocketMessage]
-  type OutgoingChatPlugin[F[_]] = UserName => Pipe[F, OutgoingWebsocketMessage, OutgoingWebsocketMessage]
+  type UserName              = String
+  type ChatPlugin[F[_], Msg] = UserName => Pipe[F, Msg, Msg]
+  // A public chat plugin works on messages coming from the user, before sending them on to the outside world.
+  // It can be features like processing commands, that the other servers might not have implemented.
+  type PublicChatPlugin[F[_]] = ChatPlugin[F, IncomingWebsocketMessage]
+  // A personal chat plugin works on messages coming from the outside, before being sent to the user.
+  // It can be stuff like highlighting your username in messages.
+  type PersonalChatPlugin[F[_]] = ChatPlugin[F, OutgoingWebsocketMessage]
 
-  def incoming[F[_]](
+  def public[F[_]](
       transform: (UserName, IncomingWebsocketMessage) => F[IncomingWebsocketMessage]
-  ): IncomingChatPlugin[F] =
+  ): PublicChatPlugin[F] =
     userName => _.evalMap(msg => transform(userName, msg))
 
-  def incomingSync[F[_]](
+  def publicSync[F[_]](
       transform: (UserName, IncomingWebsocketMessage) => IncomingWebsocketMessage
-  ): IncomingChatPlugin[F] =
+  ): PublicChatPlugin[F] =
     userName => _.map(msg => transform(userName, msg))
 
-  def outgoing[F[_]](
+  def personal[F[_]](
       transform: (UserName, OutgoingWebsocketMessage) => F[OutgoingWebsocketMessage]
-  ): OutgoingChatPlugin[F] =
+  ): PersonalChatPlugin[F] =
     userName => _.evalMap(msg => transform(userName, msg))
 
-  def outgoingSync[F[_]](
+  def personalSync[F[_]](
       transform: (UserName, OutgoingWebsocketMessage) => OutgoingWebsocketMessage
-  ): OutgoingChatPlugin[F] =
+  ): PersonalChatPlugin[F] =
     userName => _.map(msg => transform(userName, msg))
 
   def makePipe[F[_], Msg](
@@ -36,4 +40,3 @@ object ChatPlugin {
         .map(p => p(userName))
         .foldLeft[Pipe[F, Msg, Msg]](identity)(_.andThen(_))
 }
-

@@ -13,6 +13,7 @@ case class IncomingWebsocketMessage(text: String, imageUrl: Option[String], isEm
   def toPubSubMessage(username: String): PubSubMessage.Message =
     PubSubMessage.Message(username, text, isEmote.getOrElse(false), imageUrl)
 }
+
 object IncomingWebsocketMessage {
   implicit val codec: Codec[IncomingWebsocketMessage] = deriveCodec
 }

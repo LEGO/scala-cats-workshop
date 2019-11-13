@@ -3,7 +3,7 @@ package chat
 import cats.effect._
 import cats.effect.concurrent.Ref
 import cats.implicits._
-import chat.ChatPlugin.{IncomingChatPlugin, OutgoingChatPlugin}
+import chat.ChatPlugin.{PersonalChatPlugin, PublicChatPlugin}
 import chat.OutgoingWebsocketMessage.Message
 import dev.profunktor.redis4cats.algebra.SetCommands
 import dev.profunktor.redis4cats.connection
@@ -25,10 +25,10 @@ object Main extends IOApp {
   def run(args: List[String]): IO[ExitCode] =
     stream.compile.drain.as(ExitCode.Success)
 
-  val incomingPlugins: List[IncomingChatPlugin[IO]] = List(Plugins.emote)
-  val outgoingPlugins: List[OutgoingChatPlugin[IO]] = List(Plugins.highlightUser)
+  val publicChatPlugins: List[PublicChatPlugin[IO]]     = List(Plugins.emote)
+  val personalChatPlugins: List[PersonalChatPlugin[IO]] = List(Plugins.highlightUser)
 
-  val plugins = Plugins(incomingPlugins, outgoingPlugins)
+  val plugins = Plugins(publicChatPlugins, personalChatPlugins)
 
   val stream: Stream[IO, Unit] =
     for {
@@ -48,28 +48,28 @@ object Main extends IOApp {
 
 }
 
-case class Plugins[F[_]](incoming: IncomingChatPlugin[F], outgoing: OutgoingChatPlugin[F]) {
-  def incomingPipe(username: String): Pipe[F, IncomingWebsocketMessage, IncomingWebsocketMessage] =
-    incoming(username)
+case class Plugins[F[_]](public: PublicChatPlugin[F], personal: PersonalChatPlugin[F]) {
+  def publicPipe(username: String): Pipe[F, IncomingWebsocketMessage, IncomingWebsocketMessage] =
+    public(username)
 
-  def outgoingPipe(username: String): Pipe[F, OutgoingWebsocketMessage, OutgoingWebsocketMessage] =
-    outgoing(username)
+  def personalPipe(username: String): Pipe[F, OutgoingWebsocketMessage, OutgoingWebsocketMessage] =
+    personal(username)
 }
 
 object Plugins {
   def apply[F[_]](
-      incomingPlugins: List[IncomingChatPlugin[F]],
-      outgoingPlugins: List[OutgoingChatPlugin[F]]
+      public: List[PublicChatPlugin[F]],
+      personal: List[PersonalChatPlugin[F]]
   ): Plugins[F] =
-    Plugins(ChatPlugin.makePipe(incomingPlugins), ChatPlugin.makePipe(outgoingPlugins))
+    Plugins(ChatPlugin.makePipe(public), ChatPlugin.makePipe(personal))
 
-  def emote[F[_]]: IncomingChatPlugin[F] = ChatPlugin.incomingSync { (username, message) =>
+  def emote[F[_]]: PublicChatPlugin[F] = ChatPlugin.publicSync { (username, message) =>
     if (message.text.startsWith("/me "))
       message.copy(text = s"$username ${message.text.stripPrefix("/me ")}", isEmote = Some(true))
     else message
   }
 
-  def highlightUser[F[_]]: OutgoingChatPlugin[F] = ChatPlugin.outgoingSync { (currentUser, message) =>
+  def highlightUser[F[_]]: PersonalChatPlugin[F] = ChatPlugin.personalSync { (currentUser, message) =>
     message match {
       case msg @ Message(_, _, text, _, _) if text.contains(currentUser) =>
         msg.copy(text = msg.text.replace(currentUser, s"*$currentUser*"))
