@@ -25,6 +25,7 @@ export const CreateUser: FC<Props> = ({createUser}) => {
                         value={userName}
                         minLength={1}
                         required={true}
+                        autoFocus={true}
                         onChange={e => {
                             e.preventDefault()
                             setUserName(e.target.value)

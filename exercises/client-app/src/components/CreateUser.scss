@@ -28,8 +28,14 @@
       padding-bottom: 10px;
     }
 
-    input {
-      width: 100%;
+    form {
+      display: flex;
+      input {
+        width: 100%;
+        padding: 4px;
+        line-height: 17px;
+        margin: 0;
+      }
     }
   }
 }

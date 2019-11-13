@@ -19,6 +19,7 @@ export const Input: FC = () => {
                 value={message}
                 minLength={1}
                 required={true}
+                autoFocus={true}
                 onChange={e => {
                     e.preventDefault()
                     setMessage(e.target.value)
