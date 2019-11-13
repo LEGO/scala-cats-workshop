@@ -2,12 +2,12 @@ import React, {FC, ReactNode} from 'react'
 import {w3cwebsocket as WebSocket, w3cwebsocket} from 'websocket'
 
 interface State {
-    username: string
+    requestedUsername: string
     client: w3cwebsocket | null
 }
 
 const initialState: State = {
-    username: '',
+    requestedUsername: '',
     client: null,
 }
 
@@ -20,7 +20,7 @@ interface Props {
 
 export const Websocket: FC<Props> = ({username, children}) => {
     initialState.client = new WebSocket(`ws://127.0.0.1:4000/chat?username=${username}`)
-    initialState.username = username
+    initialState.requestedUsername = username
 
     return (
         <Socket.Provider value={initialState}>

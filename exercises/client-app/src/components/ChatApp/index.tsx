@@ -5,7 +5,8 @@ import {Socket} from '../../Websocket'
 import './index.scss'
 
 export const ChatApp: FC = () => {
-    const {client, username} = useContext(Socket)
+    const {client, requestedUsername} = useContext(Socket)
+    const [username, setUsername] = useState(requestedUsername)
     const [users, userList] = useState([])
     const [messages, addMessage] = useState([])
 
@@ -13,6 +14,10 @@ export const ChatApp: FC = () => {
         client!.onmessage = (message) => {
             const data = JSON.parse(message.data as string)
             console.log('chat app', data)
+            if (data.Connected) {
+                setUsername(data.Connected.username)
+                userList(data.Connected.userList)
+            }
             if (data.UserJoined) {
                 userList(data.UserJoined.userList)
             }
@@ -23,7 +28,7 @@ export const ChatApp: FC = () => {
                 addMessage(messages.concat(data.Message))
             }
         }
-    }, [client, messages])
+    }, [client, messages, username])
 
     return (
         <div className='chat-app'>
