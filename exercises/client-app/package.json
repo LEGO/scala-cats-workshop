@@ -16,7 +16,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "react-scripts build && mv build ../exercise3/src/main/resources",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
