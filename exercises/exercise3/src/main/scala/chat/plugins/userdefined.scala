@@ -1,5 +1,7 @@
 package chat.plugins
 
+import cats.implicits._
+import cats.{Functor, Monad}
 import cats.effect.IO
 import chat.OutgoingWebsocketMessage.Message
 import chat.plugins.ChatPlugin.{ChatPlugin, PersonalChatPlugin, PublicChatPlugin}
@@ -31,9 +33,11 @@ object userdefined {
         import sys.process._
         val cowSaid = s"cowsay ${message.text.stripPrefix("/cowsay ")}".!!
         message.copy(text = cowSaid.replaceAll(System.lineSeparator(), " <br>"))
-      } else
+      } else {
       IO.pure(message)
+    }
   }
+
 
   // A plugin that does nothing to the messages
   def notYetImplemented[T]: ChatPlugin[T] = _ => identity
@@ -41,6 +45,8 @@ object userdefined {
   /**
     * The following are suggestions for plugins that you could implement.
     */
+
+
   /**
     * /gif <search-string>
     *   should find the highest ranked gif based on your search-string
@@ -60,4 +66,9 @@ object userdefined {
     */
   def markdown: PublicChatPlugin = notYetImplemented
 
+  /**
+   * Runs the command "/fortune" and displays the output.
+   * (fortune is a Unix application that returns a random fortune cookie quote)
+   */
+  def fortune: PublicChatPlugin = notYetImplemented
 }

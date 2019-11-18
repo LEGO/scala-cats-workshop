@@ -1,5 +1,5 @@
 {
     "preprocessor": "preprocess.js",
-    "includeDir": "./",
+    "includeDir": "./slides-out",
     "_": ["./index.md"]
 }

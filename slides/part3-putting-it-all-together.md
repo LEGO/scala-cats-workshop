@@ -20,20 +20,19 @@ You will write your own plugins for a chat server. There are 2 kinds of plugins:
 ----
 
 ```scala
-type PluginLogic[F[_]]     = 
-    (UserName, IncomingWebsocketMessage) => 
-        F[IncomingWebsocketMessage]
+def public(
+    transform: (UserName, IncomingWebsocketMessage) => IO[IncomingWebsocketMessage]
+): PublicChatPlugin
 
-// A public chat plugin works on messages coming from the user, 
-// before sending them on to the outside world.
-// It can be features like processing commands, 
-// that the other servers might not have implemented.
-type PublicChatPlugin[F[_]] = 
-    ChatPlugin[F, IncomingWebsocketMessage]
+def publicSync(
+    transform: (UserName, IncomingWebsocketMessage) => IncomingWebsocketMessage
+): PublicChatPlugin =
 
-// A personal chat plugin works on messages
-// coming from the outside, before being sent to the user.
-// It can be stuff like highlighting your username in messages.
-type PersonalChatPlugin[F[_]] = 
-    ChatPlugin[F, OutgoingWebsocketMessage]
-```
+def personal(
+    transform: (UserName, OutgoingWebsocketMessage) => IO[OutgoingWebsocketMessage]
+): PersonalChatPlugin
+
+def personalSync(
+    transform: (UserName, OutgoingWebsocketMessage) => OutgoingWebsocketMessage
+): PersonalChatPlugin
+``` 
