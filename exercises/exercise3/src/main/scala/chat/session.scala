@@ -5,31 +5,31 @@ import cats.implicits._
 import fs2.{Pipe, Stream}
 import java.util.concurrent.TimeUnit
 
-trait Session[F[_]] {
+trait Session {
   def username: String
-  def toClient: Stream[F, OutgoingWebsocketMessage]
-  def fromClient: Pipe[F, IncomingWebsocketMessage, Unit]
+  def toClient: Stream[IO, OutgoingWebsocketMessage]
+  def fromClient: Pipe[IO, IncomingWebsocketMessage, Unit]
 }
 
-class ChatSession[F[_]: Sync](
+class ChatSession(
     val username: String,
     initialUserList: List[String],
-    incomingPipe: Pipe[F, IncomingWebsocketMessage, IncomingWebsocketMessage],
-    outgoingPipe: Pipe[F, OutgoingWebsocketMessage, OutgoingWebsocketMessage],
-    publish: Pipe[F, PubSubMessage, Unit],
-    subscribe: Stream[F, PubSubMessage]
-)(implicit timer: Timer[F])
-    extends Session[F] {
+    incomingPipe: Pipe[IO, IncomingWebsocketMessage, IncomingWebsocketMessage],
+    outgoingPipe: Pipe[IO, OutgoingWebsocketMessage, OutgoingWebsocketMessage],
+    publish: Pipe[IO, PubSubMessage, Unit],
+    subscribe: Stream[IO, PubSubMessage]
+)(implicit timer: Timer[IO])
+    extends Session {
 
-  val timestamp: F[Long] = timer.clock.realTime(TimeUnit.SECONDS)
+  val timestamp: IO[Long] = timer.clock.realTime(TimeUnit.SECONDS)
 
-  val toClient: Stream[F, OutgoingWebsocketMessage] =
+  val toClient: Stream[IO, OutgoingWebsocketMessage] =
     Stream(OutgoingWebsocketMessage.Connected(username, initialUserList)) ++
       subscribe
         .evalMap(msg => timestamp.map(ts => OutgoingWebsocketMessage.fromPubSubMessage(msg, ts)))
         .through(outgoingPipe)
 
-  val fromClient: Pipe[F, IncomingWebsocketMessage, Unit] =
+  val fromClient: Pipe[IO, IncomingWebsocketMessage, Unit] =
     _.through(incomingPipe)
       .map(_.toPubSubMessage(username))
       .through(publish)

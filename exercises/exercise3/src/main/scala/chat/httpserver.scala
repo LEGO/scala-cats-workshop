@@ -14,11 +14,11 @@ import org.http4s.websocket.WebSocketFrame
 import org.http4s.websocket.WebSocketFrame.Text
 import org.http4s.{HttpRoutes, Response, StaticFile}
 
-class HttpServer[F[_]: ConcurrentEffect: ContextShift: Timer](blocker: Blocker, channel: Channel[F])
-    extends Http4sDsl[F] {
+class HttpServer(blocker: Blocker, channel: Channel)(implicit cs: ContextShift[IO], tmr: Timer[IO])
+    extends Http4sDsl[IO] {
   object UsernameParam extends QueryParamDecoderMatcher[String]("username")
 
-  val chatRoutes: HttpRoutes[F] = HttpRoutes.of[F] {
+  val chatRoutes: HttpRoutes[IO] = HttpRoutes.of[IO] {
     case GET -> Root / "chat" :? UsernameParam(username) =>
       channel
         .connect(username)
@@ -27,32 +27,32 @@ class HttpServer[F[_]: ConcurrentEffect: ContextShift: Timer](blocker: Blocker, 
       StaticFile.fromResource("/frontend/index.html", blocker, req.some).getOrElseF(NotFound())
   }
 
-  val staticRoutes: HttpRoutes[F] =
-    resourceService[F](
+  val staticRoutes: HttpRoutes[IO] =
+    resourceService[IO](
       ResourceService.Config(
         basePath = "/frontend",
         blocker = blocker
       )
     )
 
-  val routes: HttpRoutes[F] = chatRoutes <+> staticRoutes
+  val routes: HttpRoutes[IO] = chatRoutes <+> staticRoutes
 
-  val server: BlazeServerBuilder[F] =
-    BlazeServerBuilder[F]
+  val server: BlazeServerBuilder[IO] =
+    BlazeServerBuilder[IO]
       .bindLocal(4000)
       .withHttpApp(routes.orNotFound)
 
-  def buildWebSocket(session: Session[F]): F[Response[F]] =
-    WebSocketBuilder[F].build(
+  def buildWebSocket(session: Session): IO[Response[IO]] =
+    WebSocketBuilder[IO].build(
       // Encode pubsub messages to websocket frames and make sure we disconnect the client when the websocket connection ends
       session.toClient.through(encodeWebsocketFrame).onFinalize(channel.disconnect(session)),
       // Attempt decoding to pubsubmessage, and drop frames that fail to decode
       _.through(decodeWebsocketFrame).through(session.fromClient)
     )
 
-  def encodeWebsocketFrame: Pipe[F, OutgoingWebsocketMessage, WebSocketFrame] =
+  def encodeWebsocketFrame: Pipe[IO, OutgoingWebsocketMessage, WebSocketFrame] =
     _.map(_.asJson.spaces2SortKeys).map(Text(_))
-  def decodeWebsocketFrame: Pipe[F, WebSocketFrame, IncomingWebsocketMessage] =
+  def decodeWebsocketFrame: Pipe[IO, WebSocketFrame, IncomingWebsocketMessage] =
     _.collect {
       case Text(msg, _) => decode[IncomingWebsocketMessage](msg).toOption
     }.unNone

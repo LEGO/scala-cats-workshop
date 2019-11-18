@@ -22,24 +22,26 @@ object Main extends IOApp {
   val stringCodec: LiveRedisCodec[String, String] = RedisCodec.Utf8
   val chatChannel: LiveChannel[String]            = LiveChannel("chat")
 
+  val redisEnvUri = sys.env.getOrElse("REDIS_URI", "redis://localhost")
+
   def run(args: List[String]): IO[ExitCode] =
     stream.compile.drain.as(ExitCode.Success)
 
-  val publicChatPlugins: List[PublicChatPlugin[IO]]     = List(Plugins.emote)
-  val personalChatPlugins: List[PersonalChatPlugin[IO]] = List(Plugins.highlightUser)
+  val publicChatPlugins: List[PublicChatPlugin]     = List(Plugins.emote)
+  val personalChatPlugins: List[PersonalChatPlugin] = List(Plugins.highlightUser)
 
   val plugins = Plugins(publicChatPlugins, personalChatPlugins)
 
   val stream: Stream[IO, Unit] =
     for {
-      redisUri    <- Stream.eval(connection.RedisURI.make[IO]("redis://localhost"))
+      redisUri    <- Stream.eval(connection.RedisURI.make[IO](redisEnvUri))
       client      <- Stream.resource(connection.RedisClient[IO](redisUri))
       setCommands <- makeSetCommands(client, redisUri)
       pubsub      <- PubSub.mkPubSubConnection[IO, String, PubSubMessage](client, PubSubCodec, redisUri)
       blocker     <- Stream.resource(Blocker[IO])
       localUsers  <- Stream.eval(Ref.of[IO, Set[String]](Set.empty))
-      channel     <- Stream.resource(ChatChannel.makeResource[IO](chatChannel, localUsers, plugins, setCommands, pubsub))
-      httpServer = new HttpServer[IO](blocker, channel)
+      channel     <- Stream.resource(ChatChannel.makeResource(chatChannel, localUsers, plugins, setCommands, pubsub))
+      httpServer = new HttpServer(blocker, channel)
       _ <- httpServer.server.serve
     } yield ()
 
@@ -48,28 +50,28 @@ object Main extends IOApp {
 
 }
 
-case class Plugins[F[_]](public: PublicChatPlugin[F], personal: PersonalChatPlugin[F]) {
-  def publicPipe(username: String): Pipe[F, IncomingWebsocketMessage, IncomingWebsocketMessage] =
+case class Plugins(public: PublicChatPlugin, personal: PersonalChatPlugin) {
+  def publicPipe(username: String): Pipe[IO, IncomingWebsocketMessage, IncomingWebsocketMessage] =
     public(username)
 
-  def personalPipe(username: String): Pipe[F, OutgoingWebsocketMessage, OutgoingWebsocketMessage] =
+  def personalPipe(username: String): Pipe[IO, OutgoingWebsocketMessage, OutgoingWebsocketMessage] =
     personal(username)
 }
 
 object Plugins {
-  def apply[F[_]](
-      public: List[PublicChatPlugin[F]],
-      personal: List[PersonalChatPlugin[F]]
-  ): Plugins[F] =
+  def apply(
+      public: List[PublicChatPlugin],
+      personal: List[PersonalChatPlugin]
+  ): Plugins =
     Plugins(ChatPlugin.makePipe(public), ChatPlugin.makePipe(personal))
 
-  def emote[F[_]]: PublicChatPlugin[F] = ChatPlugin.publicSync { (username, message) =>
+  def emote: PublicChatPlugin = ChatPlugin.publicSync { (username, message) =>
     if (message.text.startsWith("/me "))
       message.copy(text = s"$username ${message.text.stripPrefix("/me ")}", isEmote = Some(true))
     else message
   }
 
-  def highlightUser[F[_]]: PersonalChatPlugin[F] = ChatPlugin.personalSync { (currentUser, message) =>
+  def highlightUser: PersonalChatPlugin = ChatPlugin.personalSync { (currentUser, message) =>
     message match {
       case msg @ Message(_, _, text, _, _) if text.contains(currentUser) =>
         msg.copy(text = msg.text.replace(currentUser, s"*$currentUser*"))
