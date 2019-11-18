@@ -16,7 +16,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build && rm -rf ../exercise3/src/main/resources/frontend && mv -T build ../exercise3/src/main/resources/frontend",
+    "build": "react-scripts build && rm -rf ../exercise3/src/main/resources/frontend && mv build ../exercise3/src/main/resources/frontend",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

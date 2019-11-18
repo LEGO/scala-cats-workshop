@@ -74,7 +74,7 @@ object Plugins {
   def highlightUser: PersonalChatPlugin = ChatPlugin.personalSync { (currentUser, message) =>
     message match {
       case msg @ Message(_, _, text, _, _) if text.contains(currentUser) =>
-        msg.copy(text = msg.text.replace(currentUser, s"*$currentUser*"))
+        msg.copy(text = msg.text.replace(currentUser, s"<b>$currentUser</b>"))
       case msg => msg
     }
   }

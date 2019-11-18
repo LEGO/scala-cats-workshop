@@ -1,4 +1,5 @@
 import React, {FC} from 'react'
+
 import './Message.scss'
 
 interface IChatMessage {
@@ -23,9 +24,7 @@ export const Message: FC<Props> = ({data}) => {
                 <span className={'message-handler-user'}>{data.username}</span>
                 <span className={'message-handler-date'}>{time2Date(data.timestamp)}</span>
             </div>
-            <div className={'message-text'}>
-                <span>{data.text}</span>
-            </div>
+            <pre className={'message-text'} dangerouslySetInnerHTML={{__html: data.text}}/>
         </div>
     )
 }
