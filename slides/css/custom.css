@@ -1,3 +1,9 @@
 .language-scala.hljs {
-  overflow-x: none
+    --fsize: 18px;
+    font-size: var(--fsize);
+    line-height: calc(var(--fsize)+4px);
+}
+
+pre {
+    width: unset !important;
 }
