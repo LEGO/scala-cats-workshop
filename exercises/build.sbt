@@ -44,16 +44,17 @@ lazy val exercise3 = (project in file("exercise3"))
   .settings(commonSettings, name += ": Putting it all together (Chat Server)")
   .settings(
     libraryDependencies ++= Seq(
-      "co.fs2"            %% "fs2-io"              % V.fs2,
-      "dev.profunktor"    %% "redis4cats-effects"  % V.redis4cats,
-      "dev.profunktor"    %% "redis4cats-streams"  % V.redis4cats,
-      "dev.profunktor"    %% "redis4cats-log4cats" % V.redis4cats,
-      "io.chrisdavenport" %% "log4cats-slf4j"      % V.log4cats,
-      "io.circe"          %% "circe-derivation"    % V.circeDerivation,
-      "io.circe"          %% "circe-parser"        % V.circe,
-      "org.http4s"        %% "http4s-blaze-server" % V.http4s,
-      "org.http4s"        %% "http4s-dsl"          % V.http4s,
-      "org.http4s"        %% "http4s-server"       % V.http4s,
+      "co.fs2"               %% "fs2-io"              % V.fs2,
+      "dev.profunktor"       %% "redis4cats-effects"  % V.redis4cats,
+      "dev.profunktor"       %% "redis4cats-streams"  % V.redis4cats,
+      "dev.profunktor"       %% "redis4cats-log4cats" % V.redis4cats,
+      "io.chrisdavenport"    %% "log4cats-slf4j"      % V.log4cats,
+      "io.circe"             %% "circe-derivation"    % V.circeDerivation,
+      "io.circe"             %% "circe-parser"        % V.circe,
+      "org.http4s"           %% "http4s-blaze-server" % V.http4s,
+      "org.http4s"           %% "http4s-dsl"          % V.http4s,
+      "org.http4s"           %% "http4s-server"       % V.http4s,
+      "com.vladsch.flexmark" % "flexmark"             % "0.50.44",
       compilerPlugin("org.typelevel" %% "kind-projector" % V.kindProjector cross CrossVersion.full),
       "ch.qos.logback" % "logback-classic" % V.logback
     )

@@ -6,6 +6,7 @@ const FILE_REF_REGEX = /^FILE: (.+)$/;
 
 const isFileReference = (line) => FILE_REF_REGEX.test(line);
 const loadFileContent = (line, basePath) => {
+    console.log(`${line}, ${basePath}`)
     const filePath = line.match(FILE_REF_REGEX)[1];
 
     return readFileSync(path.join(basePath, filePath));

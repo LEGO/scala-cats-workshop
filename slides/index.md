@@ -1,3 +1,10 @@
+---
+title: Foobar
+theme: solarized
+revealOptions:
+    transition: 'fade'
+---
+
 # Scala Cats Workshop
 
 
@@ -8,7 +15,7 @@
 
 ## About Us
 
-Jonas Neubert Pedersen, Bjørn Madsen, Felix Bjært Hargreaves
+Jonas Neubert Pedersen, Bjørn Madsen, Marco Martins, Felix Bjært Hargreaves
 
 *Application Engineers*, working for **LEGO® Education**
 
@@ -33,4 +40,9 @@ FILE: part1-effects.md
 FILE: part2-typeclasses.md
 
 
-----
+---
+
+FILE: part3-putting-it-all-together.md
+
+
+---

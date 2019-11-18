@@ -1,0 +1,29 @@
+# http://www.graphviz.org/content/cluster
+
+
+digraph G {
+  graph [fontname = "Handlee"];
+  node [fontname = "Handlee bold"];
+  edge [fontname = "Handlee"];
+
+  bgcolor=lightgray;
+  style=filled;
+
+  subgraph cluster_0 {
+    style=filled;
+    bgcolor=lightblue;
+    node [style=filled, color=gray, fontcolor=black];  
+    client -> server [style="dashed", label="WebSocket"];
+    server -> client [style="dashed"];
+    label = "1 per student";
+    fontsize = 20;
+  }
+
+
+  redis -> server:se [style="dashed"];
+  server:sw -> redis [style="dashed", label="Redis protocol"];
+  
+  server [label="Chat Server (Scala)"]
+  client  [label="Client (static JavaScript)", shape=Mdiamond];
+  redis [label="global Redis\n (key value store)", shape=Msquare,style=filled];
+}

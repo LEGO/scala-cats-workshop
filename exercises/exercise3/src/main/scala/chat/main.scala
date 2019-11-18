@@ -3,8 +3,9 @@ package chat
 import cats.effect._
 import cats.effect.concurrent.Ref
 import cats.implicits._
-import chat.ChatPlugin.{PersonalChatPlugin, PublicChatPlugin}
 import chat.OutgoingWebsocketMessage.Message
+import chat.plugins.ChatPlugin.{PersonalChatPlugin, PublicChatPlugin}
+import chat.plugins.ChatPlugin
 import dev.profunktor.redis4cats.algebra.SetCommands
 import dev.profunktor.redis4cats.connection
 import dev.profunktor.redis4cats.domain._
@@ -27,10 +28,10 @@ object Main extends IOApp {
   def run(args: List[String]): IO[ExitCode] =
     stream.compile.drain.as(ExitCode.Success)
 
-  val publicChatPlugins: List[PublicChatPlugin]     = List(Plugins.emote, Plugins.cowsay)
-  val personalChatPlugins: List[PersonalChatPlugin] = List(Plugins.highlightUser)
-
-  val plugins = Plugins(publicChatPlugins, personalChatPlugins)
+  val plugins = {
+    import chat.plugins.userdefined.{allPersonalPlugins, allPublicPlugins}
+    Plugins(allPublicPlugins, allPersonalPlugins)
+  }
 
   val stream: Stream[IO, Unit] =
     for {
@@ -59,33 +60,14 @@ case class Plugins(public: PublicChatPlugin, personal: PersonalChatPlugin) {
 }
 
 object Plugins {
+
   def apply(
       public: List[PublicChatPlugin],
       personal: List[PersonalChatPlugin]
   ): Plugins =
-    Plugins(ChatPlugin.makePipe(public), ChatPlugin.makePipe(personal))
+    Plugins(
+      ChatPlugin.makePipe(public),
+      ChatPlugin.makePipe(personal)
+    )
 
-  def emote: PublicChatPlugin = ChatPlugin.publicSync { (username, message) =>
-    if (message.text.startsWith("/me "))
-      message.copy(text = s"$username ${message.text.stripPrefix("/me ")}", isEmote = Some(true))
-    else message
-  }
-
-  def highlightUser: PersonalChatPlugin = ChatPlugin.personalSync { (currentUser, message) =>
-    message match {
-      case msg @ Message(_, _, text, _, _) if text.contains(currentUser) =>
-        msg.copy(text = msg.text.replace(currentUser, s"<b>$currentUser</b>"))
-      case msg => msg
-    }
-  }
-
-  def cowsay: PublicChatPlugin = ChatPlugin.public { (_, message) =>
-    if (message.text.startsWith("/cowsay "))
-      IO.delay {
-        import sys.process._
-        val cowSaid = s"cowsay ${message.text.stripPrefix("/cowsay ")}".!!
-        message.copy(text = cowSaid.replaceAll(System.lineSeparator(), "<br>"))
-      } else
-      IO.pure(message)
-  }
 }

@@ -2,10 +2,12 @@
 
 ## Effects
 
+----
+
 > Functional programmers **don't like side effects**
 
 
-![](../slides/images/talk_about_it.gif)
+![](images/talk_about_it.gif)
 
 
 ----
@@ -82,6 +84,8 @@ def app = for {
 Await.result(app,500.millis)
 ```
 
+----
+
 <span style="font-size:3em">🤔</span> lots of code duplication...**refactor**!
 
 > **Common Subexpression Elimination:** *extract syntactically equivalent expression into constant*
@@ -108,8 +112,10 @@ def app = {
 
 Await.result(app, 500.millis)
 ```
-![](images/but_why.webp) <span style="font-size:5em">🤷</span>
 
+<div class="fragment">
+<img src="images/but_why.webp"/> <span style="font-size:5em">🤷</span>
+</div>
 ----
 
 ![](images/cats_effect_impure.png)

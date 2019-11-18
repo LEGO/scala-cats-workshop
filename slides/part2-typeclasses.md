@@ -39,7 +39,7 @@ Many quirks: priorities, ambiguities, subtyping, etc.
 
 Only **implicit values** and **implicit parameters** are needed to encode a typeclass. 
 
-![](images/phew.webp)
+![](images/phew.webp) <!-- .element height="50%" width="50%" -->
 
 ----
 
@@ -161,13 +161,15 @@ Point(1, 2) <-> Point(3, 4)
 If you have special syntax for a typeclass, **context bounds** gives you convenient syntax sugar:
 
 ```scala mdoc
-implicit def distance1[T](a:T, b:T)(implicit d: Distance[T]):Double = a <-> b
+implicit def distance1[T]
+  (a:T, b:T)(implicit d: Distance[T]): Double = a <-> b
 ```
 
 is equivalent to:
 
 ```scala mdoc
-implicit def distance2[T: Distance](a:T, b:T):Double                = a <-> b
+implicit def distance2[T: Distance]
+  (a:T, b:T):Double = a <-> b
 ```
 
 > Notice that the syntax is picked up automatically, because implicit class `DistanceOps[T]` gets desugared and added to **the companion object of `DistanceOps`**
