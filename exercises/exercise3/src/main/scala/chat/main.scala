@@ -27,7 +27,7 @@ object Main extends IOApp {
   def run(args: List[String]): IO[ExitCode] =
     stream.compile.drain.as(ExitCode.Success)
 
-  val publicChatPlugins: List[PublicChatPlugin]     = List(Plugins.emote)
+  val publicChatPlugins: List[PublicChatPlugin]     = List(Plugins.emote, Plugins.cowsay)
   val personalChatPlugins: List[PersonalChatPlugin] = List(Plugins.highlightUser)
 
   val plugins = Plugins(publicChatPlugins, personalChatPlugins)
@@ -77,5 +77,15 @@ object Plugins {
         msg.copy(text = msg.text.replace(currentUser, s"*$currentUser*"))
       case msg => msg
     }
+  }
+
+  def cowsay: PublicChatPlugin = ChatPlugin.public { (_, message) =>
+    if (message.text.startsWith("/cowsay "))
+      IO.delay {
+        import sys.process._
+        val cowSaid = s"cowsay ${message.text.stripPrefix("/cowsay ")}".!!
+        message.copy(text = cowSaid.replaceAll(System.lineSeparator(), "<br>"))
+      } else
+      IO.pure(message)
   }
 }
