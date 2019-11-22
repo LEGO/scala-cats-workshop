@@ -13,14 +13,14 @@ sealed trait SpecialFx[T] {
 }
 
 case class Delay[T](run: () => T) extends SpecialFx[T] {
-  override def unsafeRunSync: T                = run()
-  override def map[U](f: T => U): SpecialFx[U] = Delay(() => f(run()))
+  override def unsafeRunSync: T                = ???
+  override def map[U](f: T => U): SpecialFx[U] = ???
 }
 case class Pure[T](t: T) extends SpecialFx[T] {
-  override def unsafeRunSync: T                = t
-  override def map[U](f: T => U): SpecialFx[U] = Pure(f(t))
+  override def unsafeRunSync: T                = ???
+  override def map[U](f: T => U): SpecialFx[U] = ???
 }
 case class FlatMapped[T, U](effect: SpecialFx[T], f: T => SpecialFx[U]) extends SpecialFx[U] {
-  override def unsafeRunSync: U                = f(effect.unsafeRunSync).unsafeRunSync
-  override def map[A](g: U => A): SpecialFx[A] = FlatMapped(effect, f andThen (_.map(g)))
+  override def unsafeRunSync: U                = ???
+  override def map[A](g: U => A): SpecialFx[A] = ???
 }

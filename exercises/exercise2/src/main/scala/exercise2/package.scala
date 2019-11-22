@@ -3,16 +3,10 @@ import exercise2.typeclasses.{Combine, CombineId}
 package object exercise2 {
 
   object BusinessInteger {
-    implicit val combineBusinessInteger: CombineId[BusinessInteger] = new CombineId[BusinessInteger] {
-      override def combine(x: BusinessInteger, y: BusinessInteger): BusinessInteger = BusinessInteger(x.i + y.i)
-      override def id: BusinessInteger                                              = BusinessInteger(0)
-    }
+    implicit lazy val combineBusinessInteger: CombineId[BusinessInteger] = ???
   }
 
-  implicit val combineString: CombineId[String] = new CombineId[String] {
-    override def combine(x: String, y: String): String = x + y
-    override def id: String                            = ""
-  }
+  implicit val combineString: CombineId[String] = ???
 
   /**
     * This is a very special integer that the business wants
@@ -28,10 +22,7 @@ package object exercise2 {
     * '''TIP:''' use the syntax of the {{{Combine[_]}}} typeclass to make
     * this definition concise.
     */
-  def add[T: Combine](x: T, y: T): T = {
-    import typeclasses.syntax._
-    x |+| y
-  }
+  def add[T: Combine](x: T, y: T): T = ???
 
   /**
     * Combines all the elements of type {{{T}}} in a list of Ts using
@@ -40,6 +31,6 @@ package object exercise2 {
     * '''TIP:''' use one of the summon methods. Try to use the definition of 'add' from above also.
     * Alternatively, you may use an inline anonymous function.
     */
-  def fold[T: CombineId](ts: List[T]): T = ts.fold(CombineId[T].id)(add)
+  def fold[T: CombineId](ts: List[T]): T = ???
 
 }

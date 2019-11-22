@@ -18,7 +18,7 @@ val commonSettings = Seq(
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
-lazy val root = (project in file(".")).aggregate(exercise1)
+lazy val root = (project in file(".")).aggregate(exercise1, exercise2, exercise3)
 
 lazy val exercise1 = (project in file("exercise1"))
   .settings(commonSettings, name += ": Effects")

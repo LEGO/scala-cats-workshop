@@ -1,12 +1,8 @@
 package chat.plugins
 
-import cats.implicits._
-import cats.{Functor, Monad}
 import cats.effect.IO
 import chat.OutgoingWebsocketMessage.Message
 import chat.plugins.ChatPlugin.{ChatPlugin, PersonalChatPlugin, PublicChatPlugin}
-import com.vladsch.flexmark.html.HtmlRenderer
-import com.vladsch.flexmark.parser.Parser
 
 object userdefined {
 
