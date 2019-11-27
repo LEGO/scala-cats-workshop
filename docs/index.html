@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <title>Scala Cats Workshop</title>
+    <link rel="stylesheet" href="./css/reveal.css" />
+    <link rel="stylesheet" href="./css/theme/solarized.css" id="theme" />
+    <link rel="stylesheet" href="./css/highlight/zenburn.css" />
+    <link rel="stylesheet" href="./css/print/paper.css" type="text/css" media="print" />
+    <link rel="stylesheet" href="./_assets/./slides-out/css/custom.css" />
+
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides"><section ><section data-markdown><script type="text/template">
+
+# Scala Cats Workshop
+
+
+> Learn **pure functional programming** with **Scala** and **Cats**
+</script></section><section data-markdown><script type="text/template">
+## About Us
+
+Jonas Neubert Pedersen, Bjørn Madsen, Marco Martins, Felix Bjært Hargreaves
+
+*Application Engineers*, working for **LEGO® Education**
+
+Mostly *backend, functional programming*
+</script></section><section data-markdown><script type="text/template">
+
+## Workshop structure
+
+* Mix of hands-on and presentations
+* Slides are *type-checked* by the Scala compiler [via MDOC](https://github.com/scalameta/mdoc)
+* Exercises in a multi-SBT project
+</script></section></section><section ><section data-markdown><script type="text/template">
+# Part 1
+
+## Effects
+</script></section><section data-markdown><script type="text/template">
+> Functional programmers **don't like side effects**
+
+
+![](images/talk_about_it.gif)
+
+</script></section><section data-markdown><script type="text/template">
+* **Ordering** of **side effects** is difficult to reason about
+  * Dijkstra said so ([Go To Statement Considered Harmful](https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf))  ![](images/dijkstra.png)
+* **Programs without side effects are useless** (and un-observable)
+* We can **just pretend that *Scala* doesn't have them!**
+  * With discipline, we can get *referential transparency*
+</script></section><section data-markdown><script type="text/template">
+## Referential Transparency
+
+When we program with side-effects, we lose *referential transparency:*
+
+```scala
+case class Number(var n:Int){
+  def add(m:Int): Number = {
+      n = n + m
+      this
+  }
+}
+
+val x = Number(39)
+// x: Number = Number(45)
+
+val y = x add 3
+// y: Number = Number(45)
+
+y == Number(42) // Yay
+// res0: Boolean = true // Yay
+
+(x add 3) == Number(42) //Yikes!
+// res1: Boolean = false
+```
+</script></section><section data-markdown><script type="text/template">
+Some things are *easier for our brains* if stuff doesn't change:
+
+```scala
+case class Number(n:Int){
+  def add(m:Int): Number = Number(n + m)
+}
+
+val x = Number(39)
+// x: Number = Number(39)
+
+val y = x add 3
+// y: Number = Number(42)
+
+y == Number(42) // Yay
+// res3: Boolean = true // Yay
+
+(x add 3) == Number(42) //Yay 😎 !
+// res4: Boolean = true
+```
+</script></section><section data-markdown><script type="text/template">
+## Referentially transparent effects
+
+
+```scala
+def app = for {
+  _ <- Future { println("Yay!") }
+  _ <- Future { println("Yay!") }
+  _ <- Future { println("Yay!") }
+} yield ()
+
+Await.result(app,500.millis)
+// Yay!
+// Yay!
+// Yay!
+```
+</script></section><section data-markdown><script type="text/template">
+<span style="font-size:3em">🤔</span> lots of code duplication...**refactor**!
+
+> **Common Subexpression Elimination:** *extract syntactically equivalent expression into constant*
+</script></section><section data-markdown><script type="text/template">
+```scala
+def app = { 
+  val printYay = Future { println("Yay!") }
+  for {
+    _ <- printYay
+    _ <- printYay
+    _ <- printYay
+  } yield ()
+}
+
+Await.result(app, 500.millis)
+// Yay!
+```
+
+<div class="fragment">
+<img src="images/but_why.webp"/> <span style="font-size:5em">🤷</span>
+</div></script></section><section data-markdown><script type="text/template">
+![](images/cats_effect_impure.png)
+(**CREDIT**: [Impure Pics](https://impurepics.com))
+</script></section><section data-markdown><script type="text/template">
+> *Future* is **not referentially transparent**.
+
+Requires you to understand about *how Scala evaluates your expressions* <span style="font-size:3em">🤯</span>
+</script></section><section data-markdown><script type="text/template">
+## Enter: **Cats**
+
+![](images/enter_cats.gif)
+</script></section><section data-markdown><script type="text/template">
+[Cats](https://typelevel.org/cats/)
+
+> Lightweight, modular, and extensible library for functional programming
+
+![](images/cats_commutativity_diagram.png)
+</script></section><section data-markdown><script type="text/template">
+# [Cats Effect](https://typelevel.org/cats-effect/)
+
+> The IO Monad for Scala
+
+Cats effect is both an *"interface"* and an *implementation* of referentially transparent effects in Scala.
+</script></section><section data-markdown><script type="text/template">
+```scala
+import cats.effect._
+```
+
+```scala
+val app = for {
+  _ <- IO.delay{ println("Yay!") }
+  _ <- IO.delay{ println("Yay!") }
+  _ <- IO.delay{ println("Yay!") }
+} yield ()
+// app: IO[Unit] = Bind(Delay(<function0>), <function1>)
+```
+
+
+<span style="font-size:3em">🤔</span> no side-effects...**at all!?**
+
+</script></section><section data-markdown><script type="text/template">
+```scala
+val app = for {
+  _ <- IO.delay{ println("Yay!") }
+  _ <- IO.delay{ println("Yay!") }
+  _ <- IO.delay{ println("Yay!") }
+} yield ()
+// app: IO[Unit] = Bind(Delay(<function0>), <function1>)
+
+app.unsafeRunSync()
+// Yay!
+// Yay!
+// Yay!
+```
+
+<span style="font-size:3em">🤔</span> lots of code duplication again...<span style="font-size:3em">😨</span>**refactor**?
+</script></section><section data-markdown><script type="text/template">
+```scala
+val printYay = IO.delay{ println("Yay!")  }
+// printYay: IO[Unit] = Delay(<function0>)
+
+val app = for {
+  _ <- printYay
+  _ <- printYay
+  _ <- printYay
+} yield ()
+// app: IO[Unit] = Bind(Delay(<function0>), <function1>)
+```
+
+...drum-roll please <span style="font-size:3em">🥁</span>
+</script></section><section data-markdown><script type="text/template">
+```scala
+app.unsafeRunSync()
+// Yay!
+// Yay!
+// Yay!
+```
+
+![](images/thumbs_up.webp)
+</script></section><section data-markdown><script type="text/template">
+# Exercise 1
+
+Build your own effect type.
+
+```
+├── exercises
+│   ├── build.sbt
+│   ├── exercise1
+│   │   └── src
+│   │       ├── main
+│   │       │   └── scala
+│   │       │       └── exercise1
+│   │       │           ├── Exercise1Main.scala
+│   │       │           └── SpecialFx.scala
+│   │       └── test
+│   │           └── scala
+│   │               └── exercise1
+│   │                   └── SpecialFxSpec.scala
+```
+
+
+</script></section></section><section ><section data-markdown><script type="text/template">
+
+# Part 2
+
+## Typeclasses
+
+> Typeclasses are **not a language construct in Scala**
+
+> A **Typeclass** is **a design pattern** in **Scala**
+</script></section><section data-markdown><script type="text/template">
+## Implicits
+
+The typeclass pattern in Scala relies **heavily** on the use of **implicits**. Implicits have many use cases in Scala:
+
+* Implicit values
+* Implicit parameters
+* Implicit classes (extension methods)
+* ~~Implicit conversions~~ (*"deprecated"*)
+* **Advanced**:
+  * Typeclass induction (advanced)
+  * Typelevel programming (advanced)
+</script></section><section data-markdown><script type="text/template">
+
+## Implicit resolution
+
+Implicits are resolved via:
+
+* Lexical scope
+* Implicit scope (companion objects)
+* Implicit scope of *type arguments* (including `F` and `T` in `F[T]`)
+* Package objects
+
+Many quirks: priorities, ambiguities, subtyping, etc.
+</script></section><section data-markdown><script type="text/template">
+Only **implicit values** and **implicit parameters** are needed to encode a typeclass.
+
+![](images/phew.webp) <!-- .element height="50%" width="50%" -->
+</script></section><section data-markdown><script type="text/template">
+### Lexical Scope
+
+**Define** an implicit value
+
+```scala
+implicit val number:Int = 39
+// number: Int = 39
+```
+
+***Resolve*** an implicit value from local scope
+
+```scala
+def addNumber(m:Int)(implicit n:Int):Int = m + n
+addNumber(3)
+// res0: Int = 42
+```
+</script></section><section data-markdown><script type="text/template">
+### Lexical Scope with Subtyping
+
+**Define** an implicit value
+
+```scala
+trait Foo
+case object Bar extends Foo
+implicit val number = Bar
+// number: Bar.type = Bar
+```
+
+***Resolve*** an implicit value **of a subtype** from local scope
+
+```scala
+def fetch(implicit f:Foo):Foo = f
+fetch
+// res2: Foo = Bar
+```
+</script></section><section data-markdown><script type="text/template">
+### Implicit Scope
+
+```scala
+object MyInt {
+  implicit val default: MyInt = MyInt(1337)
+}
+case class MyInt(i:Int)
+
+def fetch(implicit m:MyInt): MyInt = m  
+fetch
+// res4: MyInt = MyInt(1337)
+```
+</script></section><section data-markdown><script type="text/template">
+### Implicit Scope with Generic Types
+
+```scala
+trait Show[T] {
+  def show(t:T):String
+}
+object Show {
+  implicit val showInt:Show[Int] = i => s"THIS IS MY INT -->$i<--"
+}
+
+def show[T](t: T)(implicit s: Show[T]): String = s.show(t)
+
+show(11)
+// res6: String = "THIS IS MY INT -->11<--"
+```
+</script></section><section data-markdown><script type="text/template">
+That last one...
+
+</script></section><section data-markdown><script type="text/template">
+**is a typeclass!**
+
+![](images/woah.webp)
+
+</script></section><section data-markdown><script type="text/template">
+We can add a little bit of syntactic sugar by **moving our method** into an **implicit class**:
+
+```scala
+implicit class ShowOps[T](t: T){
+  def show(implicit s:Show[T]): String = s.show(t)
+}
+
+42.show
+// res7: String = "THIS IS MY INT -->42<--"
+```
+</script></section><section data-markdown><script type="text/template">
+Let's look at another typeclass:
+
+```scala
+trait Distance[T]{
+  def distanceTo(x: T, y: T): Double
+}
+
+case class Point(x:Double, y:Double)
+object Point {
+  import math._
+  implicit val distanceTo: Distance[Point] = 
+    (a, b) => sqrt( pow( b.x-a.x, 2) + pow( b.y-a.y, 2 ))
+}
+```
+</script></section><section data-markdown><script type="text/template">
+We can add special **infix syntax** to our typeclass like so:
+
+```scala
+implicit class DistanceOps[T](t:T){
+  implicit def <->(u:T)(implicit d: Distance[T]): Double = d.distanceTo(t, u)  
+}
+
+Point(1, 2) <-> Point(3, 4) 
+// res8: Double = 2.8284271247461903
+```
+</script></section><section data-markdown><script type="text/template">
+If you have special syntax for a typeclass, **context bounds** gives you convenient syntax sugar:
+
+```scala
+implicit def distance1[T]
+  (a:T, b:T)(implicit d: Distance[T]): Double = a <-> b
+```
+
+is equivalent to:
+
+```scala
+implicit def distance2[T: Distance]
+  (a:T, b:T):Double = a <-> b
+```
+
+> Notice that the syntax is picked up automatically, because implicit class `DistanceOps[T]` gets desugared and added to **the companion object of `DistanceOps`**
+
+
+
+</script></section></section><section ><section data-markdown><script type="text/template">
+# Part 3
+
+## Putting it All Together
+</script></section><section data-markdown><script type="text/template">
+## Chat server plugins
+
+You will write your own plugins for a chat server. There are 2 kinds of plugins:
+
+* Personal
+  * Plugins from **your perspective** (only _you_ will see these changes)
+* Public
+  * Plugins from **a global perspective** (everyone will will see these changes)
+</script></section><section data-markdown><script type="text/template">
+![](images/architecture.png) <!-- .element height="50%" width="50%" -->
+</script></section><section data-markdown><script type="text/template">
+```scala
+def public(
+    transform: (UserName, IncomingWebsocketMessage) => IO[IncomingWebsocketMessage]
+): PublicChatPlugin
+
+def publicSync(
+    transform: (UserName, IncomingWebsocketMessage) => IncomingWebsocketMessage
+): PublicChatPlugin =
+
+def personal(
+    transform: (UserName, OutgoingWebsocketMessage) => IO[OutgoingWebsocketMessage]
+): PersonalChatPlugin
+
+def personalSync(
+    transform: (UserName, OutgoingWebsocketMessage) => OutgoingWebsocketMessage
+): PersonalChatPlugin
+```
+
+
+
+</script></section></section><section  data-markdown><script type="text/template">
+</script></section></div>
+    </div>
+
+    <script src="./js/reveal.js"></script>
+
+    <script>
+      function extend() {
+        var target = {};
+        for (var i = 0; i < arguments.length; i++) {
+          var source = arguments[i];
+          for (var key in source) {
+            if (source.hasOwnProperty(key)) {
+              target[key] = source[key];
+            }
+          }
+        }
+        return target;
+      }
+
+      // Optional libraries used to extend on reveal.js
+      var deps = [
+        { src: './plugin/markdown/marked.js', condition: function() { return !!document.querySelector('[data-markdown]'); } },
+        { src: './plugin/markdown/markdown.js', condition: function() { return !!document.querySelector('[data-markdown]'); } },
+        { src: './plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+        { src: './plugin/zoom-js/zoom.js', async: true },
+        { src: './plugin/notes/notes.js', async: true },
+        { src: './plugin/math/math.js', async: true }
+      ];
+
+      // default options to init reveal.js
+      var defaultOptions = {
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        transition: 'default', // none/fade/slide/convex/concave/zoom
+        dependencies: deps
+      };
+
+      // options from URL query string
+      var queryOptions = Reveal.getQueryHash() || {};
+
+      var options = extend(defaultOptions, {"transition":"fade"}, queryOptions);
+    </script>
+
+
+    <script>
+      Reveal.initialize(options);
+    </script>
+  </body>
+</html>

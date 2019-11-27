@@ -1,5 +1,5 @@
 ---
-title: Foobar
+title: Scala Cats Workshop
 theme: solarized
 revealOptions:
     transition: 'fade'
