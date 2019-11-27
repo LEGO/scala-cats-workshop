@@ -13,3 +13,6 @@ println("Hello, World!")
 // Hello, World!
 ```
 
+## Slides
+
+You can see the latest build of the slides at [https://lego.github.io/scala-cats-workshop/](https://lego.github.io/scala-cats-workshop/)
