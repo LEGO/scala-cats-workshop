@@ -51,4 +51,4 @@
 
 ## React
 
-> **React** uses many FP concepts and has **tremendous tracking at LEGO®**
+> **React** uses many FP concepts and has **tremendous traction at LEGO®**
