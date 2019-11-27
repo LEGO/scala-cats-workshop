@@ -131,7 +131,7 @@ Requires you to understand about *how Scala evaluates your expressions* <span st
 
 ## Enter: **Cats**
 
-![](images/enter_cats.gif)
+![](images/enter_cats.gif) <!-- .element height="50%" width="50%" -->
 
 ----
 
