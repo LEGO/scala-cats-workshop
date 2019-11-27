@@ -32,6 +32,10 @@ Mostly *backend, functional programming*
 
 ---
 
+FILE: part0-fp-at-lego.md
+
+---
+
 FILE: part1-effects.md
 
 ---
