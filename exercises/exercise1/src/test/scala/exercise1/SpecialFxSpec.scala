@@ -13,13 +13,16 @@ class SpecialFxSpec extends mutable.Specification {
       val effect   = delay { changeMe = "CHANGED!" }
       effect.unsafeRunSync
       changeMe must beEqualTo("CHANGED!")
-    }
+    }.pendingUntilFixed
 
     "not run effects eagerly" in {
       var changeMe = "NOT CHANGED"
       val effect   = delay { changeMe = "CHANGED!" }
       changeMe must beEqualTo(changeMe)
-    }
+
+      effect.unsafeRunSync // check that something is actually implemented
+      ok
+    }.pendingUntilFixed
 
     "reuse effect definition" in {
       var counter = 0
@@ -34,7 +37,16 @@ class SpecialFxSpec extends mutable.Specification {
       program.unsafeRunSync
 
       counter mustEqual 3
-    }
+    }.pendingUntilFixed
+
+    "[OPTIONAL] sequence list of effects" in {
+      val sequenced: SpecialFx[List[Int]] = sequenceList(List(1, 2, 3).map(i => delay { i * 2 }))
+      sequenced.unsafeRunSync must_=== List(1, 2, 3).map(_ * 2)
+    }.pendingUntilFixed("optional")
+
+    "[OPTIONAL] traverse list with effect" in {
+      traverseList(List(1, 2, 3), (i: Int) => delay { i * 2 }).unsafeRunSync must_=== List(1, 2, 3).map(_ * 2)
+    }.pendingUntilFixed("optional")
 
   }
 
