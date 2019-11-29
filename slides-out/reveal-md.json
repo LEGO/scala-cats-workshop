@@ -1,5 +1,0 @@
-{
-    "preprocessor": "preprocess.js",
-    "includeDir": "./",
-    "_": ["./index.md"]
-}
