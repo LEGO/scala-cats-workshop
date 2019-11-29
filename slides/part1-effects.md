@@ -22,6 +22,8 @@
 
 ## Referential Transparency
 
+----
+
 When we program with side-effects, we lose *referential transparency:*
 
 ```scala mdoc

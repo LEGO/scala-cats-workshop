@@ -2,7 +2,7 @@
 title: Scala Cats Workshop
 theme: solarized
 revealOptions:
-    transition: 'fade'
+    transition: 'slide'
 ---
 
 # Scala Cats Workshop

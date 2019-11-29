@@ -6,9 +6,9 @@
 
 ![](./images/code_delivery.png) <!-- .element height="50%" width="50%" -->
 
-> 253,123,206 QR codes generated as of Nov 27, 2019
+> **~250 million** QR codes generated as of Nov 27, 2019
 
-> All backends in Scala
+_All backends **in Scala**_
 
 ----
 

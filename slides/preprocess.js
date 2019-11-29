@@ -6,9 +6,12 @@ const FILE_REF_REGEX = /^FILE: (.+)$/;
 
 const isFileReference = (line) => FILE_REF_REGEX.test(line);
 const loadFileContent = (line, basePath) => {
+    console.log(`path: ${basePath}, line: ${line}`)
+    const actualPath = basePath ? basePath : "./"
+    console.log(`path: ${actualPath}`)
     const filePath = line.match(FILE_REF_REGEX)[1];
-    console.log(`path: ${path.join(basePath, filePath)}`)
-    return readFileSync(path.join(basePath, filePath));
+    console.log(`filepath: ${filePath}`)
+    return readFileSync(path.join(actualPath, filePath));
 };
 
 const preprocess = async (markdown, options) => {
