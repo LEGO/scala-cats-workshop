@@ -1,0 +1,16 @@
+.language-scala.hljs {
+    --fsize: 16px;
+    font-size: var(--fsize);
+    line-height: calc(var(--fsize) + 4px);
+}
+
+pre {
+    width: unset !important;
+}
+
+body {
+    background-image: url(../../../images/le_original_pantone_2019.svg);
+    background-size: 13%;
+    background-repeat: no-repeat;
+    background-position: 0% 99%;
+}

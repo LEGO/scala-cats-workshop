@@ -10,6 +10,6 @@ target/
 
 exercises/.idea/
 
-slides-out/
+./slides-out/
 
 .DS_Store

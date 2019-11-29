@@ -1,7 +1,7 @@
 .language-scala.hljs {
-    --fsize: 18px;
+    --fsize: 16px;
     font-size: var(--fsize);
-    line-height: calc(var(--fsize)+4px);
+    line-height: calc(var(--fsize) + 4px);
 }
 
 pre {
