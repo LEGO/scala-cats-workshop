@@ -39,6 +39,13 @@ class SpecialFxSpec extends mutable.Specification {
       counter mustEqual 3
     }.pendingUntilFixed
 
+    "map on flatmapped" in {
+      val flatMapped = pure(1330).flatMap(i => pure(i + 5))
+      val mapped     = flatMapped.map(_ + 2)
+
+      mapped.unsafeRunSync must_=== 1337
+    }
+
     "[OPTIONAL] sequence list of effects" in {
       val sequenced: SpecialFx[List[Int]] = sequenceList(List(1, 2, 3).map(i => delay { i * 2 }))
       sequenced.unsafeRunSync must_=== List(1, 2, 3).map(_ * 2)
