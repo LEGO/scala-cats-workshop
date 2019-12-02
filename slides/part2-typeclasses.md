@@ -15,7 +15,7 @@ The typeclass pattern in Scala relies **heavily** on the use of **implicits**. I
 * Implicit values
 * Implicit parameters
 * Implicit classes (extension methods)
-* ~~Implicit conversions~~ (*"deprecated"*)
+* ~~Implicit conversions~~ ("*deprecated*"*)
 * **Advanced**:
   * Typeclass induction (advanced)
   * Typelevel programming (advanced)
@@ -117,6 +117,21 @@ That last one...
 
 ----
 
+
+
+```scala mdoc:reset
+// `Show` is a typeclass
+trait Show[T] {
+  def show(t:T):String
+}
+object Show {
+  // showInt is typeclass instance of Show for Int
+  implicit val showInt:Show[Int] = i => s"THIS IS MY INT -->$i<--"
+}
+```
+
+----
+
 We can add a little bit of syntactic sugar by **moving our method** into an **implicit class**:
 
 ```scala mdoc
@@ -174,3 +189,16 @@ implicit def distance2[T: Distance]
 
 > Notice that the syntax is picked up automatically, because implicit class `DistanceOps[T]` gets desugared and added to **the companion object of `DistanceOps`**
 
+----
+
+## Exercise 2
+
+Your business owner needs you to implement `BusinessInteger` in a functional way.
+
+```scala mdoc
+final case class BusinessInteger(i: Int)
+```
+
+Solve the problem by implementing the neccessary typeclass instances!
+
+----

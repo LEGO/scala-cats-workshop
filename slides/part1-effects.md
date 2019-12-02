@@ -149,7 +149,7 @@ Requires you to understand about *how Scala evaluates your expressions* <span st
 
 > The IO Monad for Scala
 
-Cats effect is both an *"interface"* and an *implementation* of referentially transparent effects in Scala.
+Cats effect is both an "*interface*" and an *implementation* of referentially transparent effects in Scala.
 
 ----
 

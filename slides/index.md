@@ -24,17 +24,20 @@ Mostly *backend, functional programming*
 ----
 
 
+FILE: part0-fp-at-lego.md
+
+---
+
 ## Workshop structure
 
 * Mix of hands-on and presentations
 * Slides are *type-checked* by the Scala compiler [via MDOC](https://github.com/scalameta/mdoc)
 * Exercises in a multi-SBT project
+* You can follow along the slides (link in repository)
+
 
 ---
 
-FILE: part0-fp-at-lego.md
-
----
 
 FILE: part1-effects.md
 

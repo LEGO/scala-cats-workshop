@@ -39,10 +39,33 @@ You can see the latest build of the slides at [https://lego.github.io/scala-cats
 
 ## Exercises
 
+### Installing/Running SBT 
+
+On Mac OS, you can simply use the script inside the `exercises` folder, but on Windows you need to install 
+SBT locally on your machine.
+
+Open powershell and install [scoop](https://scoop.sh/):
+
+```powershell
+iwr -useb get.scoop.sh | iex
+```
+
+
+After this, install git, java, and SBT:
+
+```powershell
+scoop install git
+scoop bucket add java
+scoop install openjdk
+scoop install sbt
+```
+
+
+
 ### Running the exercises
 
 We use [SBT](https://www.scala-sbt.org/) as a build tool for the exercises. 
-SBT is an interactive tool, meaning that it's meant to be a long-running process with user interaction -- it is NOT a batch tool. To start SBT, go into the root folder `./exercises/` (root folder contains `build.sbt` file). Once there, run `./sbt` or on windows `./sbt.bat`.
+SBT is an interactive tool, meaning that it's meant to be a long-running process with user interaction -- it is NOT a batch tool. To start SBT, go into the root folder `./exercises/` (root folder contains `build.sbt` file). Once there, run `./sbt` or on Windows use SBT from your local system `sbt`.
 This script bootstraps SBT and starts it using the build definition in the current folder.
 
 The process would look something like this:
