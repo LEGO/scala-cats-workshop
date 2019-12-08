@@ -57,8 +57,8 @@ object userdefined {
         client <- GiphyApi.makeDefaultClient
         resp   <- client.random
         _        = println(resp.body)
-        response = resp.body.toOption.flatMap(_.data.images.get("fixed_height")).flatMap(_.url)
-      } yield (message.copy(text = s""" <img src="${response.mkString}"/> """))
+        imageUrl = resp.body.toOption.flatMap(_.data.images.get("fixed_height")).flatMap(_.url)
+      } yield (message.copy(text = s""" <img src="${imageUrl.mkString}"/> """))
     else {
       IO.pure(message)
     }
@@ -90,8 +90,8 @@ object GiphyApi {
       .map { implicit catsBackend =>
         new GiphyApi()
       }
-
 }
+
 class GiphyApi(implicit backend: SttpBackend[IO, Nothing, WebSocketHandler]) {
   import sttp.tapir._
   import sttp.tapir.json.circe._
