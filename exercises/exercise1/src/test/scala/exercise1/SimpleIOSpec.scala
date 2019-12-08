@@ -2,11 +2,11 @@ package exercise1
 
 import org.specs2._
 
-import SpecialFx._
+import SimpleIO._
 
-class SpecialFxSpec extends mutable.Specification {
+class SimpleIOSpec extends mutable.Specification {
 
-  "SpecialFx" should {
+  "SimpleIO" should {
 
     "execute an effect" in {
       var changeMe = "NOT CHANGED"
@@ -47,12 +47,14 @@ class SpecialFxSpec extends mutable.Specification {
     }.pendingUntilFixed
 
     "[OPTIONAL] sequence list of effects" in {
-      val sequenced: SpecialFx[List[Int]] = sequenceList(List(1, 2, 3).map(i => delay { i * 2 }))
+      val sequenced: SimpleIO[List[Int]] = sequenceList(List(1, 2, 3).map(i => delay { i * 2 }))
       sequenced.unsafeRunSync must_=== List(1, 2, 3).map(_ * 2)
     }.pendingUntilFixed("optional")
 
     "[OPTIONAL] traverse list with effect" in {
-      traverseList(List(1, 2, 3), (i: Int) => delay { i * 2 }).unsafeRunSync must_=== List(1, 2, 3).map(_ * 2)
+      val traversed = traverseList(List(1, 2, 3), (i: Int) => delay { i * 2 })
+      traversed.unsafeRunSync must_=== List(1, 2, 3).map(_ * 2)
+      traversed.map(_.sum).unsafeRunSync must_=== 12
     }.pendingUntilFixed("optional")
 
   }

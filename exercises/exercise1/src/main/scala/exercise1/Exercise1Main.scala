@@ -1,9 +1,9 @@
 package exercise1
 
-import SpecialFx._
+import SimpleIO._
 object Exercise1Main extends App {
 
-  val greetingProgram: SpecialFx[String] = for {
+  val greetingProgram: SimpleIO[String] = for {
     _    <- delay { println("Hello, who are you?") }
     name <- delay { io.StdIn.readLine("> Type your name: ") }
     _    <- delay { println(s"Nice to meet you, $name!") }
