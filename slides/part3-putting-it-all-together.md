@@ -8,7 +8,7 @@
 
 You will write your own plugins for a chat server. There are 2 kinds of plugins:
 
-* Personal 
+* Personal
   * Plugins from **your perspective** (only _you_ will see these changes)
 * Public
   * Plugins from **a global perspective** (everyone will will see these changes)
@@ -26,7 +26,7 @@ def public(
 
 def publicSync(
     transform: (UserName, IncomingWebsocketMessage) => IncomingWebsocketMessage
-): PublicChatPlugin =
+): PublicChatPlugin
 
 def personal(
     transform: (UserName, OutgoingWebsocketMessage) => IO[OutgoingWebsocketMessage]
@@ -35,4 +35,4 @@ def personal(
 def personalSync(
     transform: (UserName, OutgoingWebsocketMessage) => OutgoingWebsocketMessage
 ): PersonalChatPlugin
-``` 
+```

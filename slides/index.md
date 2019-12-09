@@ -53,3 +53,12 @@ FILE: part3-putting-it-all-together.md
 
 
 ---
+
+<!-- .slide: "center -->
+# Questions?
+
+---
+
+### Feedback
+
+https://bit.ly/2RAtrLs

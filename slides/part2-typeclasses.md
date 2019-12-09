@@ -28,7 +28,7 @@ The typeclass pattern in Scala relies **heavily** on the use of **implicits**. I
 
 Implicits are resolved via:
 
-* Lexical scope 
+* Lexical scope
 * Implicit scope (companion objects)
 * Implicit scope of *type arguments* (including `F` and `T` in `F[T]`)
 * Package objects
@@ -37,7 +37,7 @@ Many quirks: priorities, ambiguities, subtyping, etc.
 
 ----
 
-Only **implicit values** and **implicit parameters** are needed to encode a typeclass. 
+Only **implicit values** and **implicit parameters** are needed to encode a typeclass.
 
 ![](images/phew.webp) <!-- .element height="50%" width="50%" -->
 
@@ -82,13 +82,13 @@ object MyInt {
 }
 case class MyInt(i:Int)
 
-def fetch(implicit m:MyInt): MyInt = m 
+def fetch(implicit m:MyInt): MyInt = m
 fetch
 ```
 
 ----
 
-### Implicit Scope with Generic Types 
+### Implicit Scope with Generic Types
 
 ```scala mdoc:reset
 trait Show[T] {
@@ -154,7 +154,7 @@ trait Distance[T]{
 case class Point(x:Double, y:Double)
 object Point {
   import math._
-  implicit val distanceTo: Distance[Point] = 
+  implicit val distanceTo: Distance[Point] =
     (a, b) => sqrt( pow( b.x-a.x, 2) + pow( b.y-a.y, 2 ))
 }
 ```
@@ -165,10 +165,10 @@ We can add special **infix syntax** to our typeclass like so:
 
 ```scala mdoc
 implicit class DistanceOps[T](t:T){
-  implicit def <->(u:T)(implicit d: Distance[T]): Double = d.distanceTo(t, u)  
+  implicit def <->(u:T)(implicit d: Distance[T]): Double = d.distanceTo(t, u)
 }
 
-Point(1, 2) <-> Point(3, 4) 
+Point(1, 2) <-> Point(3, 4)
 ```
 
 ----
@@ -176,14 +176,14 @@ Point(1, 2) <-> Point(3, 4)
 If you have special syntax for a typeclass, **context bounds** gives you convenient syntax sugar:
 
 ```scala mdoc
-implicit def distance1[T]
+def distance1[T]
   (a:T, b:T)(implicit d: Distance[T]): Double = a <-> b
 ```
 
 is equivalent to:
 
 ```scala mdoc
-implicit def distance2[T: Distance]
+def distance2[T: Distance]
   (a:T, b:T):Double = a <-> b
 ```
 

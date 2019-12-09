@@ -15,7 +15,7 @@
 * **Ordering** of **side effects** is difficult to reason about
   * Dijkstra said so ([Go To Statement Considered Harmful](https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf))  ![](images/dijkstra.png)
 * **Programs without side effects are useless** (and un-observable)
-* We can **just pretend that *Scala* doesn't have them!** 
+* We can **just pretend that *Scala* doesn't have them!**
   * With discipline, we can get *referential transparency*
 
 ----
@@ -103,7 +103,7 @@ import scala.concurrent.duration._
 
 ```scala mdoc
 
-def app = { 
+def app = {
   val printYay = Future { println("Yay!") }
   for {
     _ <- printYay
@@ -125,7 +125,7 @@ Await.result(app, 500.millis)
 
 ----
 
-> *Future* is **not referentially transparent**. 
+> *Future* is **not referentially transparent**.
 
 Requires you to understand about *how Scala evaluates your expressions* <span style="font-size:3em">🤯</span>
 
@@ -226,10 +226,9 @@ Build your own effect type.
 │   │       │   └── scala
 │   │       │       └── exercise1
 │   │       │           ├── Exercise1Main.scala
-│   │       │           └── SpecialFx.scala
+│   │       │           └── SimpleIO.scala
 │   │       └── test
 │   │           └── scala
 │   │               └── exercise1
-│   │                   └── SpecialFxSpec.scala
+│   │                   └── SimpleIOSpec.scala
 ```
-
