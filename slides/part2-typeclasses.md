@@ -199,6 +199,6 @@ Your business owner needs you to implement `BusinessInteger` in a functional way
 final case class BusinessInteger(i: Int)
 ```
 
-Solve the problem by implementing the neccessary typeclass instances!
+Solve the problem by implementing the necessary typeclass instances!
 
 ----
