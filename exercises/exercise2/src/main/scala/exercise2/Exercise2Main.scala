@@ -1,26 +1,26 @@
 package exercise2
 
-import exercise1.SpecialFx
-import exercise1.SpecialFx._
+import exercise1.SimpleIO
+import exercise1.SimpleIO._
 import exercise2.typeclasses.CombineId
 import exercise2.typeclasses.syntax._
 
 object Exercise2Main extends App {
 
-  def getNumber: SpecialFx[BusinessInteger] =
+  def getNumber: SimpleIO[BusinessInteger] =
     for {
       _ <- delay { print("Please type an integer: ") }
       i <- delay { io.StdIn.readInt() }
     } yield BusinessInteger(i)
 
-  def getNumbers(n: Int): SpecialFx[List[BusinessInteger]] = n match {
-    case _ if n > 0 =>
+  def getNumbers(numbersToGet: Int): SimpleIO[List[BusinessInteger]] =
+    if (numbersToGet <= 0) pure(Nil)
+    else {
       for {
         n  <- getNumber
-        ns <- getNumbers(n.i - 1)
+        ns <- getNumbers(numbersToGet - 1)
       } yield n :: ns
-    case 0 => pure(Nil)
-  }
+    }
 
   private def intersperse[T](ts: List[T])(inject: T): List[T] =
     ts match {
@@ -31,7 +31,7 @@ object Exercise2Main extends App {
   private def combineIntersperse[T: CombineId](ts: List[T])(inject: T): T =
     intersperse(ts)(inject).foldLeft(CombineId[T].id)(_ |+| _)
 
-  val combineProgram: SpecialFx[BusinessInteger] = for {
+  val combineProgram: SimpleIO[BusinessInteger] = for {
     _                <- delay { print(s"How many numbers do you want to combine?: ") }
     n                <- delay { io.StdIn.readInt }
     businessIntegers <- getNumbers(n)

@@ -33,6 +33,9 @@ package object optional {
   trait Constructible[F[_]] {
     def construct[T](t: T): F[T]
   }
+  object Constructible {
+    def apply[F[_]](implicit ev: Constructible[F]): Constructible[F] = ev
+  }
 
   implicit val listConstructible: Constructible[List] = new Constructible[List] {
     override def construct[T](t: T): List[T] = List(t)
@@ -48,7 +51,7 @@ package object optional {
   }
 
   def constructAbstractF[F[_]: Constructible, T](t: T): F[T] =
-    implicitly[Constructible[F]].construct(t)
+    Constructible[F].construct(t)
 
   /**
     * In this way, we can abstract away constructors -- neat!
@@ -60,6 +63,9 @@ package object optional {
     */
   trait Mappable[F[_]] {
     def map[T, U](ft: F[T])(f: T => U): F[U]
+  }
+  object Mappable {
+    def apply[F[_]](implicit ev: Mappable[F]): Mappable[F] = ev
   }
 
   implicit val listMappable: Mappable[List] = new Mappable[List] {
@@ -73,7 +79,7 @@ package object optional {
     * Now we can map on "some kind of thing that produces T"
     */
   def mapOnF[F[_]: Mappable, T, U](ft: F[T])(f: T => U): F[U] =
-    implicitly[Mappable[F]].map(ft)(f)
+    Mappable[F].map(ft)(f)
 
   val multiplied: List[Int] = mapOnF(List(1, 2, 3))(_ * 2)
 }

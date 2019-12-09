@@ -2,14 +2,6 @@ package exercise2
 
 package object typeclasses {
 
-  object Combine {
-
-    /**
-      * We call this a "summon" method. It's just a convenience over '''implicitly'''
-      */
-    def apply[T: Combine]: Combine[T] = implicitly[Combine[T]]
-  }
-
   /**
     * In Scala, a typeclass is basically any trait with
     * a single type parameter. There are special rules
@@ -38,10 +30,14 @@ package object typeclasses {
       */
     def combine(x: A, y: A): A
   }
+  object Combine {
 
-  object CombineId {
-    def apply[T: CombineId]: CombineId[T] = implicitly[CombineId[T]]
+    /**
+      * We call this a "summon" method. It's just a convenience over '''implicitly'''
+      */
+    def apply[T](implicit ev: Combine[T]): Combine[T] = ev
   }
+
   trait CombineId[A] extends Combine[A] {
 
     /**
@@ -52,6 +48,9 @@ package object typeclasses {
       * }}}
       */
     def id: A
+  }
+  object CombineId {
+    def apply[T](implicit ev: CombineId[T]): CombineId[T] = ev
   }
 
   object syntax {
