@@ -42,12 +42,12 @@ package object optional {
   }
 
   implicit val optionConstructible: Constructible[Option] = new Constructible[Option] {
-    override def construct[T](t: T): Option[T] = ???
+    override def construct[T](t: T): Option[T] = Some(t)
   }
 
   type EitherFixedLeft[R] = Either[String, R]
   implicit val eitherConstructible: Constructible[EitherFixedLeft] = new Constructible[EitherFixedLeft] {
-    override def construct[T](t: T): EitherFixedLeft[T] = ???
+    override def construct[T](t: T): EitherFixedLeft[T] = Right(t)
   }
 
   def constructAbstractF[F[_]: Constructible, T](t: T): F[T] =
@@ -72,7 +72,7 @@ package object optional {
     override def map[T, U](ft: List[T])(f: T => U): List[U] = ft.map(f)
   }
   implicit val eitherMappable: Mappable[EitherFixedLeft] = new Mappable[EitherFixedLeft] {
-    override def map[T, U](ft: EitherFixedLeft[T])(f: T => U): EitherFixedLeft[U] = ???
+    override def map[T, U](ft: EitherFixedLeft[T])(f: T => U): EitherFixedLeft[U] = ft.map(f)
   }
 
   /**
